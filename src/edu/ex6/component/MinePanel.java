@@ -50,6 +50,7 @@ public class MinePanel extends Panel{
                 }catch (NullPointerException npe) {
                     npe.printStackTrace ();
                 }
+                index++;
             }
         }
         return this;
@@ -60,7 +61,7 @@ public class MinePanel extends Panel{
      */
     public MinePanel fill(MineDO mineDO){
         this.setLayout ( new GridLayout ( mineDO.getTotal (),mineDO.getTotal (),0,0 ) );
-        for (Mine i[]:mineDO.getMines ()
+        for (Mine[] i :mineDO.getMines ()
                  ) {
             for (Mine j:
                     i) {

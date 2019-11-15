@@ -58,7 +58,11 @@ public class Mine extends Button {
     @Override
     public void paint(Graphics g){
         super.paint ( g );
+        System.out.println (this.aroundMinesNu);
         g.drawRect ( 0,0,50,50 );
+        if (this.aroundMinesNu != 0) {
+            g.drawString ( String.valueOf ( this.aroundMinesNu ), 25, 25 );
+        }
     }
 
     public boolean isMine() {

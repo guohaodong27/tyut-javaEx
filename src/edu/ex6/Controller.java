@@ -32,7 +32,9 @@ public class Controller {
                     new Frame ( "You Are win!!" );
                 }else{
                     //检查
-                    check ( (Mine)e.getComponent ());
+                    Mine m = (Mine)e.getComponent ();
+                    m.setAroundMinesNu ( check ( (Mine)e.getComponent ()));
+                    m.repaint ();
                 }
             }
         };
@@ -89,26 +91,35 @@ public class Controller {
     /**
      * 点击方块判断
      */
-    public void check(Mine checkMine){
-        System.out.println ("check");
+    private int calculate(Mine checkMine){
+        int count = 0;
+        int x = checkMine.getX ()-1;
+        int y = checkMine.getY ()-1;
+        for (int i=0;i<3;i++){
+            for (int j = 0; j <3 ; j++) {
+                if(i!=2&&j!=2&&!isOutOfIndex ( x+i )&&!isOutOfIndex ( y+j )){
+                    try {
+                        // 计数
+                        if (mineDO.getMines ()[y+j][x+i].isMine ()) {
+                            count++;
+                        }
+                    }catch (ArrayIndexOutOfBoundsException e){
+                        e.printStackTrace ();
+                    }
+                }
+            }
+        }
+        return count;
+    }
+    public int check(Mine checkMine){
+        System.out.println (checkMine.isMine ());
         if(checkMine.isMine ()){
             // todo game over
             new Frame ( "You Are lost" ).setVisible ( true );
             checkMine.setBackground ( Color.BLACK );
+            return -1;
         }else{
-            int x = checkMine.getX ()-1;
-            int y = checkMine.getY ()-1;
-            for (int i=0;i<3;i++){
-                for (int j = 0; j <3 ; j++) {
-                    if(i!=2&&j!=2&&!isOutOfIndex ( x+i )&&!isOutOfIndex ( y+j )){
-                        try {
-                            check ( mineDO.getMines ()[x+i][y+j] );
-                        }catch (ArrayIndexOutOfBoundsException e){
-                            e.printStackTrace ();
-                        }
-                    }
-                }
-            }
+            return calculate ( checkMine );
         }
     }
 
@@ -121,7 +132,7 @@ public class Controller {
 class Test{
     public static void main(String[] args) {
         Controller controller = new Controller ();
-        controller.launch ( 25,5 );
+        controller.launch ( 2,5 );
     }
 }
 
