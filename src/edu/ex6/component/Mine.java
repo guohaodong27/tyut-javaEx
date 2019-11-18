@@ -60,7 +60,7 @@ public class Mine extends Button {
         super.paint ( g );
         System.out.println (this.aroundMinesNu);
         g.drawRect ( 0,0,50,50 );
-        if (this.aroundMinesNu != 0) {
+        if (this.aroundMinesNu != 0&&this.aroundMinesNu!=-1) {
             g.drawString ( String.valueOf ( this.aroundMinesNu ), 25, 25 );
         }
     }

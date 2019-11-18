@@ -5,10 +5,7 @@ import edu.ex6.component.Mine;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class Controller {
     private View view;
@@ -102,6 +99,8 @@ public class Controller {
                         // 计数
                         if (mineDO.getMines ()[y+j][x+i].isMine ()) {
                             count++;
+                        }else{
+
                         }
                     }catch (ArrayIndexOutOfBoundsException e){
                         e.printStackTrace ();
@@ -110,6 +109,31 @@ public class Controller {
             }
         }
         return count;
+    }
+
+    public int levelOrder(Mine orderMine){
+        Queue<Mine> queue = new LinkedList<> (  );
+        int count =0;
+        if(check ( orderMine )==0){
+            int x = orderMine.getX ()-1;
+            int y = orderMine.getY ()-1;
+            for (int i=0;i<3;i++){
+                for (int j = 0; j <3 ; j++) {
+                    if(i!=2&&j!=2&&!isOutOfIndex ( x+i )&&!isOutOfIndex ( y+j )){
+                        try {
+                            // 计数
+                            if (mineDO.getMines ()[y+j][x+i].isMine ()) {
+                                count++;
+                            }
+
+                        }catch (ArrayIndexOutOfBoundsException e){
+                            e.printStackTrace ();
+                        }
+                    }
+                }
+            }
+        }
+        return 0;
     }
     public int check(Mine checkMine){
         System.out.println (checkMine.isMine ());
@@ -129,10 +153,10 @@ public class Controller {
 
 }
 
-class Test{
+class Test {
     public static void main(String[] args) {
         Controller controller = new Controller ();
-        controller.launch ( 2,5 );
+
     }
 }
 
