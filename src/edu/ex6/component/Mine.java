@@ -36,6 +36,13 @@ public class Mine extends Button {
     private int y;
 
     /**
+     * 是否被访问
+     */
+    private boolean isVisited;
+
+
+
+    /**
      * 鼠标监听器
      */
     private MouseAdapter listener;
@@ -45,21 +52,19 @@ public class Mine extends Button {
         this.y = y;
         this.isMine = isMine;
         this.addMouseListener ( listener );
-        init ();
     }
 
-    private void init(){
+    {
         this.setBounds (0,0,40,40);
         this.setSize ( 40,40 );
 //        this.setLocation (  x*WIDTH,y*HEIGHT);
         this.setVisible ( true );
+        this.isVisited = false;
     }
 
     @Override
     public void paint(Graphics g){
         super.paint ( g );
-        System.out.println (this.aroundMinesNu);
-        g.drawRect ( 0,0,50,50 );
         if (this.aroundMinesNu != 0&&this.aroundMinesNu!=-1) {
             g.drawString ( String.valueOf ( this.aroundMinesNu ), 25, 25 );
         }
@@ -105,5 +110,12 @@ public class Mine extends Button {
 
     public void setListener(MouseAdapter listener) {
         this.listener = listener;
+    }
+    public boolean isVisited() {
+        return isVisited;
+    }
+
+    public void setVisited(boolean visited) {
+        isVisited = visited;
     }
 }

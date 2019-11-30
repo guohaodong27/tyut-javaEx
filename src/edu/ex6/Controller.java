@@ -1,7 +1,9 @@
 package edu.ex6;
 
 import edu.ex6.component.Mine;
+import edu.ex6.component.WinView;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -26,12 +28,20 @@ public class Controller {
                 if(e.getButton ()== MouseEvent.BUTTON3){
                     // 标记
                     mark ((Mine)e.getComponent ());
-                    new Frame ( "You Are win!!" );
+
+                    // 获胜
+                    if(isWin(mineDO)){
+                        JFrame win = new WinView("You Have Win");
+                        win.repaint();
+                    }
                 }else{
                     //检查
                     Mine m = (Mine)e.getComponent ();
-                    m.setAroundMinesNu ( check ( (Mine)e.getComponent ()));
-                    m.repaint ();
+                    if (m.isMine()){
+                        JFrame lost = new WinView("You Have Lost");
+                        lost.repaint();
+                    }
+                    levelOrder(m);
                 }
             }
         };
@@ -42,14 +52,15 @@ public class Controller {
      * @param minesNu 地雷数量
      * @param total 总共雷区的宽（雷块总数的算数平方根）
      */
-    public void launch(int minesNu,int total){
+    void launch(int minesNu, int total){
         this.mineDO = new MineDO ();
         mineDO.setMines ( new Mine[total][total] );
         mineDO.setMineNu ( minesNu );
         mineDO.setTotal ( total );
         mineDO.setMarked ( new HashSet<> ( minesNu ) );
+
+        // 生成雷区位置
         Set<Integer> set = new HashSet<> (  );
-        int x = set.size ();
         Random random = new Random ( System.currentTimeMillis () );
         while(set.size ()<minesNu){
             set.add ( Math.abs (random.nextInt ()%(total*total) ));
@@ -70,85 +81,77 @@ public class Controller {
     /**
      * 标记为雷块
      */
-    public void mark(Mine markMine){
-        System.out.println ("mark");
+    private void mark(Mine markMine){
         Set<Integer> mark = mineDO.getMarked ();
-        mark.add ( markMine.getX ()*mineDO.getTotal ()+markMine.getY () );
+        Integer index = markMine.getX ()*mineDO.getTotal ()+markMine.getY ();
+
+        // 判断是否已经加入标记
+        if (mark.contains(index)) {
+            mark.remove(index);
+            markMine.setBackground ( Color.GRAY);
+        } else {
+            mark.add(index);
+            markMine.setBackground ( Color.GREEN );
+        }
         mineDO.setMarked ( mark );
-        markMine.setBackground ( Color.GREEN );
     }
 
     /**
      * 获胜判断
      */
-    public boolean isWin(MineDO mineDO){
+    private boolean isWin(MineDO mineDO){
         return mineDO.getMineIndex ().equals ( mineDO.getMarked () );
     }
 
     /**
-     * 点击方块判断
+     * 遍历雷区
+     * @param orderMine 点击的雷区
      */
-    private int calculate(Mine checkMine){
-        int count = 0;
-        int x = checkMine.getX ()-1;
-        int y = checkMine.getY ()-1;
-        for (int i=0;i<3;i++){
-            for (int j = 0; j <3 ; j++) {
-                if(i!=2&&j!=2&&!isOutOfIndex ( x+i )&&!isOutOfIndex ( y+j )){
-                    try {
-                        // 计数
-                        if (mineDO.getMines ()[y+j][x+i].isMine ()) {
-                            count++;
-                        }else{
-
-                        }
-                    }catch (ArrayIndexOutOfBoundsException e){
-                        e.printStackTrace ();
-                    }
-                }
-            }
-        }
-        return count;
-    }
-
-    public int levelOrder(Mine orderMine){
+    private void levelOrder(Mine orderMine){
+        // 如果周围8个没有雷则将雷块加入队列
         Queue<Mine> queue = new LinkedList<> (  );
+
+        // 周围的雷块数
         int count =0;
-        if(check ( orderMine )==0){
+        if(!orderMine.isMine()&&!orderMine.isVisited()){
             int x = orderMine.getX ()-1;
             int y = orderMine.getY ()-1;
             for (int i=0;i<3;i++){
                 for (int j = 0; j <3 ; j++) {
-                    if(i!=2&&j!=2&&!isOutOfIndex ( x+i )&&!isOutOfIndex ( y+j )){
+                    if(!(i==1&&j==1)&& isOutOfIndex(x + i) && isOutOfIndex(y + j)){
                         try {
+                            Mine cur = mineDO.getMines()[x+i][y+j];
                             // 计数
-                            if (mineDO.getMines ()[y+j][x+i].isMine ()) {
+                            if (cur.isMine ()) {
                                 count++;
+                            }else{
+                                if (!cur.isVisited()) {
+                                    queue.add(mineDO.getMines()[x+i][y+j]);
+                                }
                             }
-
                         }catch (ArrayIndexOutOfBoundsException e){
                             e.printStackTrace ();
                         }
                     }
                 }
             }
-        }
-        return 0;
-    }
-    public int check(Mine checkMine){
-        System.out.println (checkMine.isMine ());
-        if(checkMine.isMine ()){
-            // todo game over
-            new Frame ( "You Are lost" ).setVisible ( true );
-            checkMine.setBackground ( Color.BLACK );
-            return -1;
-        }else{
-            return calculate ( checkMine );
+            // order the mine around and make it visited
+            orderMine.setVisited(true);
+            orderMine.setBackground(Color.GRAY);
+            if (!(count==0)){
+                orderMine.setAroundMinesNu(count);
+                orderMine.repaint();
+            }else{
+                if (queue.size()!=0) {
+                    queue.forEach(this::levelOrder);
+                }
+            }
         }
     }
 
+    // 检验是否超出总的雷区
     private boolean isOutOfIndex(int x){
-        return x < 0 || x >= mineDO.getTotal ();
+        return x >= 0 && x < mineDO.getTotal();
     }
 
 }
@@ -156,6 +159,7 @@ public class Controller {
 class Test {
     public static void main(String[] args) {
         Controller controller = new Controller ();
+        controller.launch(1,6);
 
     }
 }
